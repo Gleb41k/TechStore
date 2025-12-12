@@ -1,0 +1,2333 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Mobile5G | Telegram Mini App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Оптимизация для Telegram Mini App */
+    :root {
+      --tg-theme-bg-color: #FFFFFF;
+      --tg-theme-text-color: #1e293b;
+      --tg-theme-hint-color: #64748b;
+      --tg-theme-link-color: #009DFF;
+      --tg-theme-button-color: #009DFF;
+      --tg-theme-button-text-color: #FFFFFF;
+      --tg-theme-secondary-bg-color: #f8fafc;
+      --primary: #009DFF;
+      --primary-dark: #0077cc;
+      --secondary: #00c3ff;
+      --accent: #ff6b35;
+      --success: #10b981;
+      --danger: #ff4757;
+      --border: #e2e8f0;
+      --card-radius: 16px;
+      --shadow: rgba(0, 157, 255, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--tg-theme-bg-color, #FFFFFF);
+      color: var(--tg-theme-text-color, #1e293b);
+      line-height: 1.5;
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+
+    /* Заголовок для Telegram */
+    .tg-header {
+      background: var(--tg-theme-bg-color, #FFFFFF);
+      padding: 16px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 2px 10px rgba(0, 157, 255, 0.08);
+    }
+
+    .tg-header .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .tg-header .logo i {
+      color: var(--primary);
+    }
+
+    .tg-header .logo span {
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .tg-header .user-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .icon-btn {
+      background: var(--tg-theme-secondary-bg-color);
+      border: 1px solid var(--border);
+      color: var(--tg-theme-text-color);
+      font-size: 1.1rem;
+      padding: 8px;
+      border-radius: 10px;
+      position: relative;
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .icon-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 157, 255, 0.15);
+    }
+
+    .badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: var(--primary);
+      color: white;
+      font-size: 0.7rem;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid white;
+    }
+
+    /* Основной контент */
+    .container {
+      padding: 0 16px;
+      max-width: 100%;
+    }
+
+    /* Категории */
+    .categories {
+      padding: 20px 0;
+      overflow-x: auto;
+      display: flex;
+      gap: 10px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .categories::-webkit-scrollbar {
+      display: none;
+    }
+
+    .category-btn {
+      flex-shrink: 0;
+      padding: 10px 20px;
+      background: var(--tg-theme-secondary-bg-color);
+      border: 1px solid var(--border);
+      border-radius: 25px;
+      color: var(--tg-theme-text-color);
+      font-weight: 500;
+      transition: all 0.2s;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .category-btn:hover {
+      border-color: var(--primary);
+    }
+
+    .category-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(0, 157, 255, 0.2);
+    }
+
+    /* Карточки товаров */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 16px;
+      margin-top: 10px;
+    }
+
+    .product-card {
+      background: var(--tg-theme-bg-color);
+      border-radius: var(--card-radius);
+      overflow: hidden;
+      transition: all 0.3s;
+      border: 1px solid var(--border);
+      position: relative;
+      box-shadow: 0 4px 12px rgba(0, 157, 255, 0.08);
+    }
+
+    .product-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0, 157, 255, 0.15);
+    }
+
+    .product-card:active {
+      transform: scale(0.98);
+    }
+
+    .product-image {
+      height: 140px;
+      overflow: hidden;
+      position: relative;
+      background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+    }
+
+    .product-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .product-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: var(--primary);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(0, 157, 255, 0.3);
+    }
+
+    .favorite-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid var(--border);
+      color: var(--danger);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .favorite-btn.active {
+      background: var(--danger);
+      color: white;
+      border-color: var(--danger);
+    }
+
+    .favorite-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .product-content {
+      padding: 12px;
+    }
+
+    .product-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 5px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .product-price {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin: 8px 0;
+    }
+
+    .product-rating {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: #ffb300;
+      font-size: 0.8rem;
+      margin-bottom: 8px;
+    }
+
+    .add-to-cart-btn {
+      width: 100%;
+      padding: 10px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 157, 255, 0.2);
+    }
+
+    .add-to-cart-btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    .add-to-cart-btn:active {
+      opacity: 0.8;
+      transform: translateY(0);
+    }
+
+    /* Детальная страница товара */
+    .product-detail {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--tg-theme-bg-color);
+      z-index: 1000;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .product-detail.active {
+      display: block;
+    }
+
+    .detail-header {
+      position: sticky;
+      top: 0;
+      background: var(--tg-theme-bg-color);
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      z-index: 10;
+      box-shadow: 0 2px 10px rgba(0, 157, 255, 0.08);
+    }
+
+    .back-btn {
+      background: var(--tg-theme-secondary-bg-color);
+      border: 1px solid var(--border);
+      color: var(--tg-theme-text-color);
+      font-size: 1.2rem;
+      padding: 8px;
+      border-radius: 10px;
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .detail-image {
+      height: 300px;
+      overflow: hidden;
+      background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+    }
+
+    .detail-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .detail-content {
+      padding: 20px;
+    }
+
+    .detail-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .detail-price {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 15px;
+    }
+
+    .detail-description {
+      color: var(--tg-theme-hint-color);
+      line-height: 1.6;
+      margin-bottom: 25px;
+    }
+
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .spec-item {
+      background: var(--tg-theme-secondary-bg-color);
+      padding: 15px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+
+    .spec-item:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .spec-label {
+      font-size: 0.8rem;
+      color: var(--tg-theme-hint-color);
+      margin-bottom: 5px;
+    }
+
+    .spec-value {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .detail-actions {
+      position: sticky;
+      bottom: 0;
+      background: var(--tg-theme-bg-color);
+      padding: 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 12px;
+      box-shadow: 0 -2px 10px rgba(0, 157, 255, 0.08);
+    }
+
+    .buy-btn {
+      flex: 1;
+      padding: 16px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 157, 255, 0.2);
+      transition: all 0.2s;
+    }
+
+    .buy-btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    .cart-btn-big {
+      width: 50px;
+      background: var(--tg-theme-secondary-bg-color);
+      color: var(--primary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .cart-btn-big:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    /* Страницы избранного и профиля */
+    .page {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .page-header {
+      padding: 20px;
+      text-align: center;
+      background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+      margin-bottom: 20px;
+      border-radius: 0 0 20px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .page-header h1 {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+      color: var(--primary);
+    }
+
+    .page-header p {
+      color: var(--tg-theme-hint-color);
+    }
+
+    .favorites-empty, .profile-section {
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .favorites-empty i, .profile-section i {
+      font-size: 4rem;
+      color: var(--tg-theme-hint-color);
+      margin-bottom: 20px;
+    }
+
+    .profile-card {
+      background: var(--tg-theme-bg-color);
+      border-radius: var(--card-radius);
+      padding: 25px;
+      margin: 20px;
+      text-align: center;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 12px rgba(0, 157, 255, 0.08);
+    }
+
+    .profile-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      color: white;
+      box-shadow: 0 4px 12px rgba(0, 157, 255, 0.3);
+    }
+
+    .profile-name {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    .profile-email {
+      color: var(--tg-theme-hint-color);
+      margin-bottom: 20px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin: 25px 0;
+    }
+
+    .stat-item {
+      background: var(--tg-theme-bg-color);
+      padding: 15px;
+      border-radius: 12px;
+      text-align: center;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+
+    .stat-item:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--tg-theme-hint-color);
+      margin-top: 5px;
+    }
+
+    .profile-menu {
+      margin: 20px;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 18px;
+      background: var(--tg-theme-bg-color);
+      border-radius: 12px;
+      margin-bottom: 10px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .menu-item:hover {
+      transform: translateX(5px);
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(0, 157, 255, 0.1);
+    }
+
+    .menu-item i {
+      font-size: 1.2rem;
+      width: 24px;
+      text-align: center;
+    }
+
+    .menu-item-content {
+      flex: 1;
+    }
+
+    .menu-item-title {
+      font-weight: 600;
+      margin-bottom: 3px;
+    }
+
+    .menu-item-desc {
+      font-size: 0.8rem;
+      color: var(--tg-theme-hint-color);
+    }
+
+    /* Корзина */
+    .cart-panel {
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 100%;
+      height: 100%;
+      background: var(--tg-theme-bg-color);
+      z-index: 2000;
+      transition: right 0.3s;
+      overflow-y: auto;
+      box-shadow: -4px 0 20px rgba(0, 157, 255, 0.1);
+    }
+
+    .cart-panel.active {
+      right: 0;
+    }
+
+    .cart-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--tg-theme-bg-color);
+      box-shadow: 0 2px 10px rgba(0, 157, 255, 0.08);
+    }
+
+    .cart-items {
+      padding: 20px;
+    }
+
+    .cart-item {
+      display: flex;
+      gap: 15px;
+      padding: 15px;
+      background: var(--tg-theme-bg-color);
+      border-radius: 12px;
+      margin-bottom: 15px;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+
+    .cart-item:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .cart-item-image {
+      width: 80px;
+      height: 80px;
+      border-radius: 10px;
+      overflow: hidden;
+      background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+    }
+
+    .cart-item-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .cart-item-content {
+      flex: 1;
+    }
+
+    .cart-item-title {
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .cart-item-price {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .cart-item-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .quantity-btn {
+      width: 30px;
+      height: 30px;
+      background: var(--tg-theme-secondary-bg-color);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      color: var(--tg-theme-text-color);
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .quantity-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .quantity {
+      font-weight: 600;
+      min-width: 30px;
+      text-align: center;
+    }
+
+    .cart-total {
+      padding: 20px;
+      border-top: 1px solid var(--border);
+      position: sticky;
+      bottom: 0;
+      background: var(--tg-theme-bg-color);
+      box-shadow: 0 -2px 10px rgba(0, 157, 255, 0.08);
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .checkout-btn {
+      width: 100%;
+      padding: 16px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 1rem;
+      margin-top: 15px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 157, 255, 0.2);
+      transition: all 0.2s;
+    }
+
+    .checkout-btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    /* Нижнее меню */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--tg-theme-bg-color);
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 0;
+      border-top: 1px solid var(--border);
+      z-index: 100;
+      box-shadow: 0 -2px 10px rgba(0, 157, 255, 0.08);
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: var(--tg-theme-hint-color);
+      font-size: 0.8rem;
+      gap: 5px;
+      padding: 8px 16px;
+      border-radius: 12px;
+      transition: all 0.2s;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .nav-item.active {
+      color: var(--primary);
+      background: rgba(0, 157, 255, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .nav-item i {
+      font-size: 1.2rem;
+    }
+
+    /* Адаптивность */
+    @media (min-width: 768px) {
+      .container {
+        max-width: 768px;
+        margin: 0 auto;
+      }
+
+      .products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      }
+
+      .cart-panel {
+        width: 400px;
+      }
+
+      .page-header {
+        margin: 0 20px 20px;
+      }
+    }
+
+    /* Анимации */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.3s ease;
+    }
+
+    /* Скелетон загрузки */
+    .skeleton {
+      background: linear-gradient(90deg, #f0f9ff 25%, #e0f2fe 50%, #f0f9ff 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+      border-radius: 8px;
+    }
+
+    @keyframes loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* Кнопки авторизации */
+    .auth-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .auth-btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .login-btn {
+      background: var(--tg-theme-secondary-bg-color);
+      color: var(--primary);
+      border: 1px solid var(--primary);
+    }
+
+    .register-btn {
+      background: var(--primary);
+      color: white;
+      border: 1px solid var(--primary);
+    }
+
+    .auth-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 157, 255, 0.2);
+    }
+
+    /* Страницы разделов */
+    .section-page {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .section-page.active {
+      display: block;
+    }
+
+    .order-item {
+      background: var(--tg-theme-bg-color);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+      border: 1px solid var(--border);
+    }
+
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .order-status {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .status-delivered {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+    }
+
+    .status-processing {
+      background: rgba(255, 107, 53, 0.1);
+      color: var(--accent);
+    }
+
+    .status-pending {
+      background: rgba(0, 157, 255, 0.1);
+      color: var(--primary);
+    }
+
+    .order-products {
+      margin-top: 10px;
+    }
+
+    .order-product {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px;
+      background: var(--tg-theme-secondary-bg-color);
+      border-radius: 8px;
+      margin-bottom: 5px;
+    }
+
+    .order-product-image {
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .order-product-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .address-card {
+      background: var(--tg-theme-bg-color);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 15px;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+
+    .address-card:hover {
+      border-color: var(--primary);
+    }
+
+    .address-card.active {
+      border: 2px solid var(--primary);
+      background: rgba(0, 157, 255, 0.05);
+    }
+
+    .address-type {
+      display: inline-block;
+      padding: 4px 12px;
+      background: rgba(0, 157, 255, 0.1);
+      color: var(--primary);
+      border-radius: 20px;
+      font-size: 0.8rem;
+      margin-bottom: 10px;
+    }
+
+    .payment-method {
+      background: var(--tg-theme-bg-color);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 15px;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      transition: all 0.2s;
+    }
+
+    .payment-method:hover {
+      border-color: var(--primary);
+    }
+
+    .payment-method.active {
+      border: 2px solid var(--primary);
+      background: rgba(0, 157, 255, 0.05);
+    }
+
+    .payment-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: white;
+    }
+
+    .payment-card {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+    }
+
+    .payment-yoomoney {
+      background: linear-gradient(135deg, #ff6b35, #ff9e00);
+    }
+
+    .payment-sbp {
+      background: linear-gradient(135deg, #10b981, #00c3ff);
+    }
+
+    .support-info {
+      background: var(--tg-theme-bg-color);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px;
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .support-contact {
+      margin-top: 20px;
+      padding: 15px;
+      background: var(--tg-theme-secondary-bg-color);
+      border-radius: 10px;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      padding: 10px;
+      background: var(--tg-theme-bg-color);
+      border-radius: 8px;
+    }
+
+    .contact-item i {
+      color: var(--primary);
+      width: 20px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Шапка Telegram -->
+  <div class="tg-header">
+    <div class="logo" id="homeButton">
+      <i class="fas fa-mobile-alt"></i>
+      <span>Mobile5G</span>
+    </div>
+    <div class="user-actions">
+      <button class="icon-btn" id="favoritesButton">
+        <i class="fas fa-heart"></i>
+        <span class="badge" id="favoritesCount">0</span>
+      </button>
+      <button class="icon-btn" id="cartButton">
+        <i class="fas fa-shopping-cart"></i>
+        <span class="badge" id="cartCount">0</span>
+      </button>
+      <button class="icon-btn" id="profileButton">
+        <i class="fas fa-user"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Главная страница -->
+  <div class="page active" id="homePage">
+    <div class="container">
+      <!-- Категории -->
+      <div class="categories">
+        <button class="category-btn active" data-category="all">Все</button>
+        <button class="category-btn" data-category="phones">Смартфоны</button>
+        <button class="category-btn" data-category="laptops">Ноутбуки</button>
+        <button class="category-btn" data-category="audio">Аудио</button>
+        <button class="category-btn" data-category="accessories">Аксессуары</button>
+      </div>
+
+      <!-- Сетка товаров -->
+      <div class="products-grid" id="productsGrid">
+        <!-- Товары будут загружены через JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Страница избранного -->
+  <div class="page" id="favoritesPage">
+    <div class="page-header">
+      <h1><i class="fas fa-heart"></i> Избранное</h1>
+      <p>Ваши любимые товары</p>
+    </div>
+
+    <div class="container">
+      <div class="products-grid" id="favoritesGrid">
+        <!-- Избранные товары будут загружены динамически -->
+      </div>
+
+      <div class="favorites-empty" id="favoritesEmpty" style="display: none;">
+        <i class="fas fa-heart-broken"></i>
+        <h3>В избранном пока ничего нет</h3>
+        <p style="color: var(--tg-theme-hint-color); margin-top: 10px;">
+          Добавляйте товары в избранное, нажимая на сердечко
+        </p>
+        <button class="add-to-cart-btn" style="margin-top: 20px; width: auto; padding: 12px 24px;" id="goToHomeFromFav">
+          <i class="fas fa-store"></i> Перейти в магазин
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Страница профиля -->
+  <div class="page" id="profilePage">
+    <div class="page-header">
+      <h1><i class="fas fa-user-circle"></i> Профиль</h1>
+      <p>Управление аккаунтом и настройки</p>
+    </div>
+
+    <div class="profile-card">
+      <div class="profile-avatar">
+        <i class="fas fa-user"></i>
+      </div>
+      <div class="profile-name" id="userName">Гость</div>
+      <div class="profile-balance" style="color: var(--primary); font-size: 1.2rem; font-weight: 600; margin: 15px 0;">
+        Баланс: <span id="userBalance">0 ₽</span>
+      </div>
+
+      <div class="auth-buttons" id="authButtons">
+        <button class="auth-btn login-btn" id="loginButton">
+          <i class="fas fa-sign-in-alt"></i> Войти
+        </button>
+        <button class="auth-btn register-btn" id="registerButton">
+          <i class="fas fa-user-plus"></i> Регистрация
+        </button>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-value" id="ordersCount">0</div>
+        <div class="stat-label">Заказов</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="favoritesStat">0</div>
+        <div class="stat-label">Избранное</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="cartItemsCount">0</div>
+        <div class="stat-label">В корзине</div>
+      </div>
+    </div>
+
+    <div class="profile-menu">
+      <div class="menu-item" id="ordersMenuItem">
+        <i class="fas fa-box-open" style="color: var(--primary);"></i>
+        <div class="menu-item-content">
+          <div class="menu-item-title">Мои заказы</div>
+          <div class="menu-item-desc">История и статус заказов</div>
+        </div>
+        <i class="fas fa-chevron-right"></i>
+      </div>
+
+      <div class="menu-item" id="addressesMenuItem">
+        <i class="fas fa-map-marker-alt" style="color: var(--success);"></i>
+        <div class="menu-item-content">
+          <div class="menu-item-title">Адреса доставки</div>
+          <div class="menu-item-desc">Управление адресами</div>
+        </div>
+        <i class="fas fa-chevron-right"></i>
+      </div>
+
+      <div class="menu-item" id="paymentMenuItem">
+        <i class="fas fa-credit-card" style="color: var(--primary);"></i>
+        <div class="menu-item-content">
+          <div class="menu-item-title">Способы оплаты</div>
+          <div class="menu-item-desc">Карты и платежные системы</div>
+        </div>
+        <i class="fas fa-chevron-right"></i>
+      </div>
+
+      <div class="menu-item" id="supportMenuItem">
+        <i class="fas fa-headset" style="color: var(--danger);"></i>
+        <div class="menu-item-content">
+          <div class="menu-item-title">Поддержка</div>
+          <div class="menu-item-desc">Помощь и обратная связь</div>
+        </div>
+        <i class="fas fa-chevron-right"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Страница "Мои заказы" -->
+  <div class="page section-page" id="ordersPage">
+    <div class="detail-header">
+      <button class="back-btn" id="backFromOrders">
+        <i class="fas fa-arrow-left"></i>
+      </button>
+      <h2>Мои заказы</h2>
+      <div style="width: 40px;"></div>
+    </div>
+
+    <div class="container">
+      <div class="page-header" style="margin: 0 0 20px 0; border-radius: 0 0 20px 20px;">
+        <h2><i class="fas fa-box-open"></i> История заказов</h2>
+        <p>Все ваши покупки в одном месте</p>
+      </div>
+
+      <div id="ordersList">
+        <div class="order-item">
+          <div class="order-header">
+            <h3>Заказ №0001</h3>
+            <div class="order-status status-delivered">Доставлен</div>
+          </div>
+          <p><strong>Дата:</strong> 15.03.2024</p>
+          <p><strong>Сумма:</strong> 99 990 ₽</p>
+          <div class="order-products">
+            <div class="order-product">
+              <div class="order-product-image">
+                <img src="https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=100&h=100&fit=crop" alt="iPhone 15 Pro">
+              </div>
+              <div>
+                <div><strong>iPhone 15 Pro</strong></div>
+                <div>1 шт. × 99 990 ₽</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="order-item">
+          <div class="order-header">
+            <h3>Заказ №0002</h3>
+            <div class="order-status status-processing">В обработке</div>
+          </div>
+          <p><strong>Дата:</strong> 10.03.2024</p>
+          <p><strong>Сумма:</strong> 34 990 ₽</p>
+          <div class="order-products">
+            <div class="order-product">
+              <div class="order-product-image">
+                <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=100&h=100&fit=crop" alt="Sony WH-1000XM5">
+              </div>
+              <div>
+                <div><strong>Sony WH-1000XM5</strong></div>
+                <div>1 шт. × 34 990 ₽</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="order-item">
+          <div class="order-header">
+            <h3>Заказ №0003</h3>
+            <div class="order-status status-pending">Ожидает оплаты</div>
+          </div>
+          <p><strong>Дата:</strong> 05.03.2024</p>
+          <p><strong>Сумма:</strong> 44 990 ₽</p>
+          <div class="order-products">
+            <div class="order-product">
+              <div class="order-product-image">
+                <img src="https://images.unsplash.com/photo-1551816230-ef5deaed4a26?w=100&h=100&fit=crop" alt="Apple Watch Series 9">
+              </div>
+              <div>
+                <div><strong>Apple Watch Series 9</strong></div>
+                <div>1 шт. × 44 990 ₽</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align: center; padding: 40px 20px; color: var(--tg-theme-hint-color);" id="noOrders">
+        <i class="fas fa-box-open" style="font-size: 3rem; margin-bottom: 20px;"></i>
+        <h3>Заказов пока нет</h3>
+        <p>Совершите первую покупку, и здесь появится история ваших заказов</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Страница "Адреса доставки" -->
+  <div class="page section-page" id="addressesPage">
+    <div class="detail-header">
+      <button class="back-btn" id="backFromAddresses">
+        <i class="fas fa-arrow-left"></i>
+      </button>
+      <h2>Адреса доставки</h2>
+      <div style="width: 40px;"></div>
+    </div>
+
+    <div class="container">
+      <div class="page-header" style="margin: 0 0 20px 0; border-radius: 0 0 20px 20px;">
+        <h2><i class="fas fa-map-marker-alt"></i> Мои адреса</h2>
+        <p>Управление адресами доставки</p>
+      </div>
+
+      <div id="addressesList">
+        <div class="address-card active">
+          <div class="address-type">Основной адрес</div>
+          <h3>Дом</h3>
+          <p><strong>ФИО:</strong> Гость</p>
+          <p><strong>Адрес:</strong> г. Москва, ул. Примерная, д. 10, кв. 25</p>
+          <p><strong>Телефон:</strong> +7 (999) 123-45-67</p>
+        </div>
+
+        <div class="address-card">
+          <div class="address-type">Рабочий адрес</div>
+          <h3>Офис</h3>
+          <p><strong>ФИО:</strong> Гость</p>
+          <p><strong>Адрес:</strong> г. Москва, ул. Рабочая, д. 5, офис 301</p>
+          <p><strong>Телефон:</strong> +7 (999) 123-45-67</p>
+        </div>
+      </div>
+
+      <button class="add-to-cart-btn" style="margin: 20px 0;" id="addAddressBtn">
+        <i class="fas fa-plus"></i> Добавить новый адрес
+      </button>
+    </div>
+  </div>
+
+  <!-- Страница "Способы оплаты" -->
+  <div class="page section-page" id="paymentPage">
+    <div class="detail-header">
+      <button class="back-btn" id="backFromPayment">
+        <i class="fas fa-arrow-left"></i>
+      </button>
+      <h2>Способы оплаты</h2>
+      <div style="width: 40px;"></div>
+    </div>
+
+    <div class="container">
+      <div class="page-header" style="margin: 0 0 20px 0; border-radius: 0 0 20px 20px;">
+        <h2><i class="fas fa-credit-card"></i> Платежные методы</h2>
+        <p>Выберите способ оплаты заказов</p>
+      </div>
+
+      <div id="paymentMethods">
+        <div class="payment-method active">
+          <div class="payment-icon payment-card">
+            <i class="fas fa-credit-card"></i>
+          </div>
+          <div class="payment-info">
+            <h3>Банковская карта</h3>
+            <p>•••• 4567 (Visa)</p>
+            <p><small>Основной способ оплаты</small></p>
+          </div>
+        </div>
+
+        <div class="payment-method">
+          <div class="payment-icon payment-yoomoney">
+            <i class="fas fa-wallet"></i>
+          </div>
+          <div class="payment-info">
+            <h3>ЮMoney</h3>
+            <p>Кошелек: 4100 1234 5678 9012</p>
+          </div>
+        </div>
+
+        <div class="payment-method">
+          <div class="payment-icon payment-sbp">
+            <i class="fas fa-mobile-alt"></i>
+          </div>
+          <div class="payment-info">
+            <h3>СБП</h3>
+            <p>Система быстрых платежей</p>
+          </div>
+        </div>
+      </div>
+
+      <button class="add-to-cart-btn" style="margin: 20px 0;" id="addPaymentBtn">
+        <i class="fas fa-plus"></i> Добавить способ оплаты
+      </button>
+    </div>
+  </div>
+
+  <!-- Страница "Поддержка" -->
+  <div class="page section-page" id="supportPage">
+    <div class="detail-header">
+      <button class="back-btn" id="backFromSupport">
+        <i class="fas fa-arrow-left"></i>
+      </button>
+      <h2>Поддержка</h2>
+      <div style="width: 40px;"></div>
+    </div>
+
+    <div class="container">
+      <div class="page-header" style="margin: 0 0 20px 0; border-radius: 0 0 20px 20px;">
+        <h2><i class="fas fa-headset"></i> Служба поддержки</h2>
+        <p>Мы всегда готовы помочь</p>
+      </div>
+
+      <div class="support-info">
+        <i class="fas fa-headset" style="font-size: 3rem; color: var(--primary); margin-bottom: 20px;"></i>
+        <h3>Нужна помощь?</h3>
+        <p>Наша служба поддержки работает круглосуточно и готова ответить на все ваши вопросы</p>
+
+        <div class="support-contact">
+          <h4>Контактная информация:</h4>
+
+          <div class="contact-item">
+            <i class="fas fa-envelope"></i>
+            <div>
+              <strong>Email:</strong>
+              <div>support@mobile5g.ru</div>
+            </div>
+          </div>
+
+          <div class="contact-item">
+            <i class="fas fa-phone"></i>
+            <div>
+              <strong>Телефон:</strong>
+              <div>+7 (800) 555-35-35</div>
+            </div>
+          </div>
+
+          <div class="contact-item">
+            <i class="fas fa-clock"></i>
+            <div>
+              <strong>Время работы:</strong>
+              <div>Круглосуточно, без выходных</div>
+            </div>
+          </div>
+
+          <div class="contact-item">
+            <i class="fas fa-telegram"></i>
+            <div>
+              <strong>Telegram:</strong>
+              <div>@mobile5g_support</div>
+            </div>
+          </div>
+        </div>
+
+        <p style="margin-top: 20px; font-size: 0.9rem; color: var(--tg-theme-hint-color);">
+          Обычно мы отвечаем в течение 15 минут в рабочее время
+        </p>
+      </div>
+
+      <button class="add-to-cart-btn" style="margin: 20px 0;" id="contactAdminBtn">
+        <i class="fas fa-paper-plane"></i> Написать администратору
+      </button>
+    </div>
+  </div>
+
+  <!-- Детальная страница товара -->
+  <div class="product-detail" id="productDetail">
+    <div class="detail-header">
+      <button class="back-btn" id="backButton">
+        <i class="fas fa-arrow-left"></i>
+      </button>
+      <button class="icon-btn" id="detailFavoriteButton">
+        <i class="fas fa-heart"></i>
+      </button>
+      <button class="icon-btn" id="detailCartButton">
+        <i class="fas fa-shopping-cart"></i>
+        <span class="badge" id="detailCartCount">0</span>
+      </button>
+    </div>
+
+    <div class="detail-image" id="detailImage">
+      <!-- Изображение будет загружено динамически -->
+    </div>
+
+    <div class="detail-content">
+      <h1 class="detail-title" id="detailTitle"></h1>
+      <div class="detail-price" id="detailPrice"></div>
+      <p class="detail-description" id="detailDescription"></p>
+
+      <div class="specs-grid" id="specsGrid">
+        <!-- Характеристики будут загружены динамически -->
+      </div>
+    </div>
+
+    <div class="detail-actions">
+      <button class="buy-btn" id="buyButton">
+        <i class="fas fa-bolt"></i> Купить сейчас
+      </button>
+      <button class="cart-btn-big" id="addToCartDetail">
+        <i class="fas fa-cart-plus"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Панель корзины -->
+  <div class="cart-panel" id="cartPanel">
+    <div class="cart-header">
+      <h2>Корзина</h2>
+      <button class="back-btn" id="closeCartButton">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="cart-items" id="cartItems">
+      <!-- Товары в корзине будут загружены динамически -->
+    </div>
+
+    <div class="cart-total">
+      <div class="total-row">
+        <span>Товары:</span>
+        <span id="subtotal">0 ₽</span>
+      </div>
+      <div class="total-row">
+        <span>Доставка:</span>
+        <span>Бесплатно</span>
+      </div>
+      <div class="total-row" style="font-weight: 700; font-size: 1.2rem;">
+        <span>Итого:</span>
+        <span id="total">0 ₽</span>
+      </div>
+      <button class="checkout-btn" id="checkoutButton">
+        <i class="fas fa-lock"></i> Перейти к оплате
+      </button>
+    </div>
+  </div>
+
+  <!-- Нижнее меню -->
+  <div class="bottom-nav">
+    <a href="#" class="nav-item active" data-page="home">
+      <i class="fas fa-home"></i>
+      <span>Главная</span>
+    </a>
+    <a href="#" class="nav-item" data-page="favorites">
+      <i class="fas fa-heart"></i>
+      <span>Избранное</span>
+    </a>
+    <a href="#" class="nav-item" data-page="profile">
+      <i class="fas fa-user"></i>
+      <span>Профиль</span>
+    </a>
+  </div>
+
+  <script>
+    // Telegram WebApp инициализация
+    let tg = window.Telegram?.WebApp;
+
+    if (tg) {
+      tg.expand();
+      tg.enableClosingConfirmation();
+      tg.BackButton.onClick(() => {
+        if (document.getElementById('productDetail').classList.contains('active')) {
+          closeProductDetail();
+        } else if (document.getElementById('cartPanel').classList.contains('active')) {
+          closeCart();
+        } else if (document.querySelector('.section-page.active')) {
+          showPage('profile');
+        } else if (!document.getElementById('homePage').classList.contains('active')) {
+          showPage('home');
+        }
+      });
+    }
+
+    // Данные товаров
+    let products = [
+      {
+        id: 1,
+        name: "iPhone 15 Pro",
+        price: 99990,
+        category: "phones",
+        image: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=400&h=400&fit=crop",
+        rating: 4.8,
+        description: "Флагманский смартфон с чипом A17 Pro, камерой 48 МП и титановым корпусом.",
+        specs: {
+          "Процессор": "Apple A17 Pro",
+          "Память": "256 ГБ",
+          "Экран": "6.1\" Super Retina XDR",
+          "Камера": "48 МП + 12 МП + 12 МП",
+          "Батарея": "3274 mAh"
+        }
+      },
+      {
+        id: 2,
+        name: "Samsung Galaxy S24",
+        price: 84990,
+        category: "phones",
+        image: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400&h=400&fit=crop",
+        rating: 4.7,
+        description: "Инновационный смартфон с искусственным интеллектом и продвинутой камерой.",
+        specs: {
+          "Процессор": "Snapdragon 8 Gen 3",
+          "Память": "256 ГБ",
+          "Экран": "6.2\" Dynamic AMOLED",
+          "Камера": "50 МП + 12 МП + 10 МП",
+          "Батарея": "4000 mAh"
+        }
+      },
+      {
+        id: 3,
+        name: "Xiaomi 14 Pro",
+        price: 69990,
+        category: "phones",
+        image: "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400&h=400&fit=crop",
+        rating: 4.6,
+        description: "Мощный смартфон с камерой Leica и быстрой зарядкой 120W.",
+        specs: {
+          "Процессор": "Snapdragon 8 Gen 2",
+          "Память": "512 ГБ",
+          "Экран": "6.73\" AMOLED",
+          "Камера": "50 МП Leica",
+          "Батарея": "4880 mAh"
+        }
+      },
+      {
+        id: 4,
+        name: "MacBook Air M3",
+        price: 129990,
+        category: "laptops",
+        image: "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=400&h=400&fit=crop",
+        rating: 4.9,
+        description: "Ультратонкий ноутбук с чипом Apple M3, экраном Liquid Retina.",
+        specs: {
+          "Процессор": "Apple M3",
+          "Память": "16 ГБ / 512 ГБ",
+          "Экран": "13.6\" Liquid Retina",
+          "Батарея": "до 18 часов",
+          "Вес": "1.24 кг"
+        }
+      },
+      {
+        id: 5,
+        name: "Dell XPS 13",
+        price: 109990,
+        category: "laptops",
+        image: "https://images.unsplash.com/photo-1593640408182-31c70c8268f5?w=400&h=400&fit=crop",
+        rating: 4.7,
+        description: "Премиальный ультрабук с безрамочным дисплеем и мощным процессором.",
+        specs: {
+          "Процессор": "Intel Core i7",
+          "Память": "16 ГБ / 1 ТБ",
+          "Экран": "13.4\" 4K UHD",
+          "Батарея": "до 14 часов",
+          "Вес": "1.27 кг"
+        }
+      },
+      {
+        id: 6,
+        name: "Sony WH-1000XM5",
+        price: 34990,
+        category: "audio",
+        image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop",
+        rating: 4.8,
+        description: "Беспроводные наушники с лучшим в мире шумоподавлением.",
+        specs: {
+          "Тип": "Накладные",
+          "Шумоподавление": "Адаптивное",
+          "Время работы": "до 30 часов",
+          "Вес": "250 г",
+          "Bluetooth": "5.2"
+        }
+      },
+      {
+        id: 7,
+        name: "Apple Watch Series 9",
+        price: 44990,
+        category: "accessories",
+        image: "https://images.unsplash.com/photo-1551816230-ef5deaed4a26?w=400&h=400&fit=crop",
+        rating: 4.7,
+        description: "Умные часы с функцией двойного нажатия и чипом S9.",
+        specs: {
+          "Экран": "Always-On Retina",
+          "Процессор": "Apple S9",
+          "Память": "64 ГБ",
+          "Водозащита": "WR50",
+          "Батарея": "до 18 часов"
+        }
+      },
+      {
+        id: 8,
+        name: "AirPods Pro 2",
+        price: 24990,
+        category: "audio",
+        image: "https://images.unsplash.com/photo-1599660663230-2c4e4faa6c5c?w=400&h=400&fit=crop",
+        rating: 4.7,
+        description: "Наушники с адаптивным шумоподавлением и пространственным аудио.",
+        specs: {
+          "Тип": "Вкладыши",
+          "Шумоподавление": "Адаптивное",
+          "Время работы": "до 6 часов",
+          "Вес": "5.3 г (каждый)",
+          "Зарядка": "MagSafe"
+        }
+      }
+    ];
+
+    let cart = JSON.parse(localStorage.getItem('mobile5g_cart')) || [];
+    let favorites = JSON.parse(localStorage.getItem('mobile5g_favorites')) || [];
+    let currentCategory = 'all';
+    let userBalance = 0;
+    let isLoggedIn = false;
+
+    // Функции для работы со страницами
+    function showPage(pageId) {
+      // Скрываем все страницы
+      document.querySelectorAll('.page, .section-page').forEach(page => {
+        page.classList.remove('active');
+      });
+
+      // Показываем нужную страницу
+      const pageElement = document.getElementById(pageId + 'Page');
+      if (pageElement) {
+        pageElement.classList.add('active');
+      }
+
+      // Обновляем нижнее меню только для основных страниц
+      if (['home', 'favorites', 'profile'].includes(pageId)) {
+        document.querySelectorAll('.nav-item').forEach(item => {
+          item.classList.remove('active');
+          if (item.dataset.page === pageId) {
+            item.classList.add('active');
+          }
+        });
+      }
+
+      // Обновляем контент страницы
+      if (pageId === 'home') {
+        renderProducts();
+      } else if (pageId === 'favorites') {
+        renderFavorites();
+        updateProfileStats();
+      } else if (pageId === 'profile') {
+        updateProfileStats();
+        updateUserInfo();
+      }
+
+      // Управление кнопкой "Назад" в Telegram
+      if (tg) {
+        if (pageId === 'home' && !document.querySelector('.section-page.active')) {
+          tg.BackButton.hide();
+        } else {
+          tg.BackButton.show();
+        }
+      }
+    }
+
+    // Функция обновления информации пользователя
+    function updateUserInfo() {
+      document.getElementById('userName').textContent = isLoggedIn ? 'Пользователь' : 'Гость';
+      document.getElementById('userBalance').textContent = userBalance.toLocaleString() + ' ₽';
+
+      const authButtons = document.getElementById('authButtons');
+      if (isLoggedIn) {
+        authButtons.innerHTML = `
+          <button class="auth-btn login-btn" id="logoutButton" style="flex: 1;">
+            <i class="fas fa-sign-out-alt"></i> Выйти
+          </button>
+        `;
+      } else {
+        authButtons.innerHTML = `
+          <button class="auth-btn login-btn" id="loginButton">
+            <i class="fas fa-sign-in-alt"></i> Войти
+          </button>
+          <button class="auth-btn register-btn" id="registerButton">
+            <i class="fas fa-user-plus"></i> Регистрация
+          </button>
+        `;
+      }
+    }
+
+    // Функция рендеринга товаров
+    function renderProducts() {
+      const grid = document.getElementById('productsGrid');
+      grid.innerHTML = '';
+
+      const filteredProducts = currentCategory === 'all'
+        ? products
+        : products.filter(p => p.category === currentCategory);
+
+      if (filteredProducts.length === 0) {
+        grid.innerHTML = `
+          <div style="grid-column: 1/-1; text-align: center; padding: 40px 20px; color: var(--tg-theme-hint-color);">
+            <i class="fas fa-box-open" style="font-size: 3rem; margin-bottom: 20px;"></i>
+            <p>Товары не найдены</p>
+          </div>
+        `;
+        return;
+      }
+
+      filteredProducts.forEach(product => {
+        const isFavorite = favorites.includes(product.id);
+
+        const card = document.createElement('div');
+        card.className = 'product-card fade-in';
+        card.innerHTML = `
+          <div class="product-image">
+            <img src="${product.image}" alt="${product.name}" loading="lazy">
+            <div class="product-badge">-10%</div>
+            <button class="favorite-btn ${isFavorite ? 'active' : ''}" data-id="${product.id}">
+              <i class="fas fa-heart"></i>
+            </button>
+          </div>
+          <div class="product-content">
+            <h3 class="product-title">${product.name}</h3>
+            <div class="product-rating">
+              <i class="fas fa-star"></i>
+              <span>${product.rating}</span>
+            </div>
+            <div class="product-price">${product.price.toLocaleString()} ₽</div>
+            <button class="add-to-cart-btn" data-id="${product.id}">
+              <i class="fas fa-cart-plus"></i> В корзину
+            </button>
+          </div>
+        `;
+
+        card.addEventListener('click', (e) => {
+          if (!e.target.closest('.favorite-btn') && !e.target.closest('.add-to-cart-btn')) {
+            showProductDetail(product.id);
+          }
+        });
+
+        grid.appendChild(card);
+      });
+
+      // Добавляем обработчики для кнопок
+      document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const productId = parseInt(btn.dataset.id);
+          addToCart(productId);
+        });
+      });
+
+      document.querySelectorAll('.favorite-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const productId = parseInt(btn.dataset.id);
+          toggleFavorite(productId);
+        });
+      });
+    }
+
+    // Функция рендеринга избранного
+    function renderFavorites() {
+      const grid = document.getElementById('favoritesGrid');
+      const emptyState = document.getElementById('favoritesEmpty');
+
+      grid.innerHTML = '';
+
+      if (favorites.length === 0) {
+        grid.style.display = 'none';
+        emptyState.style.display = 'block';
+        return;
+      }
+
+      grid.style.display = 'grid';
+      emptyState.style.display = 'none';
+
+      favorites.forEach(favId => {
+        const product = products.find(p => p.id === favId);
+        if (!product) return;
+
+        const card = document.createElement('div');
+        card.className = 'product-card fade-in';
+        card.innerHTML = `
+          <div class="product-image">
+            <img src="${product.image}" alt="${product.name}" loading="lazy">
+            <div class="product-badge">-10%</div>
+            <button class="favorite-btn active" data-id="${product.id}">
+              <i class="fas fa-heart"></i>
+            </button>
+          </div>
+          <div class="product-content">
+            <h3 class="product-title">${product.name}</h3>
+            <div class="product-rating">
+              <i class="fas fa-star"></i>
+              <span>${product.rating}</span>
+            </div>
+            <div class="product-price">${product.price.toLocaleString()} ₽</div>
+            <button class="add-to-cart-btn" data-id="${product.id}">
+              <i class="fas fa-cart-plus"></i> В корзину
+            </button>
+          </div>
+        `;
+
+        card.addEventListener('click', (e) => {
+          if (!e.target.closest('.favorite-btn') && !e.target.closest('.add-to-cart-btn')) {
+            showProductDetail(product.id);
+          }
+        });
+
+        grid.appendChild(card);
+      });
+
+      // Добавляем обработчики для кнопок
+      document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const productId = parseInt(btn.dataset.id);
+          addToCart(productId);
+        });
+      });
+
+      document.querySelectorAll('.favorite-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const productId = parseInt(btn.dataset.id);
+          toggleFavorite(productId);
+        });
+      });
+    }
+
+    // Функция обновления статистики профиля
+    function updateProfileStats() {
+      document.getElementById('favoritesStat').textContent = favorites.length;
+      document.getElementById('cartItemsCount').textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+      // Обновляем счетчик избранного в шапке
+      document.getElementById('favoritesCount').textContent = favorites.length;
+    }
+
+    // Функция показа деталей товара
+    function showProductDetail(productId) {
+      const product = products.find(p => p.id === productId);
+      if (!product) return;
+
+      const isFavorite = favorites.includes(productId);
+
+      document.getElementById('detailTitle').textContent = product.name;
+      document.getElementById('detailPrice').textContent = `${product.price.toLocaleString()} ₽`;
+      document.getElementById('detailDescription').textContent = product.description;
+
+      document.getElementById('detailImage').innerHTML = `
+        <img src="${product.image}" alt="${product.name}">
+      `;
+
+      // Настраиваем кнопку избранного
+      const favBtn = document.getElementById('detailFavoriteButton');
+      favBtn.innerHTML = `<i class="fas fa-heart ${isFavorite ? 'active' : ''}"></i>`;
+      favBtn.querySelector('i').style.color = isFavorite ? 'var(--danger)' : 'var(--primary)';
+
+      const specsGrid = document.getElementById('specsGrid');
+      specsGrid.innerHTML = '';
+
+      for (const [key, value] of Object.entries(product.specs)) {
+        const specItem = document.createElement('div');
+        specItem.className = 'spec-item';
+        specItem.innerHTML = `
+          <div class="spec-label">${key}</div>
+          <div class="spec-value">${value}</div>
+        `;
+        specsGrid.appendChild(specItem);
+      }
+
+      document.getElementById('productDetail').classList.add('active');
+
+      if (tg) {
+        tg.BackButton.show();
+      }
+
+      // Назначаем обработчики для кнопок в деталях
+      document.getElementById('addToCartDetail').onclick = () => addToCart(productId);
+      document.getElementById('buyButton').onclick = () => {
+        addToCart(productId);
+        openCart();
+      };
+      document.getElementById('detailFavoriteButton').onclick = () => {
+        toggleFavorite(productId);
+        const newIsFavorite = favorites.includes(productId);
+        favBtn.innerHTML = `<i class="fas fa-heart ${newIsFavorite ? 'active' : ''}"></i>`;
+        favBtn.querySelector('i').style.color = newIsFavorite ? 'var(--danger)' : 'var(--primary)';
+      };
+    }
+
+    // Функция закрытия деталей товара
+    function closeProductDetail() {
+      document.getElementById('productDetail').classList.remove('active');
+
+      if (tg) {
+        if (document.getElementById('homePage').classList.contains('active')) {
+          tg.BackButton.hide();
+        }
+      }
+    }
+
+    // Функции для избранного
+    function toggleFavorite(productId) {
+      const index = favorites.indexOf(productId);
+
+      if (index === -1) {
+        favorites.push(productId);
+        showNotification('Добавлено в избранное');
+      } else {
+        favorites.splice(index, 1);
+        showNotification('Удалено из избранного');
+      }
+
+      localStorage.setItem('mobile5g_favorites', JSON.stringify(favorites));
+      updateProfileStats();
+
+      // Обновляем отображение на текущей странице
+      if (document.getElementById('favoritesPage').classList.contains('active')) {
+        renderFavorites();
+      } else if (document.getElementById('homePage').classList.contains('active')) {
+        renderProducts();
+      }
+    }
+
+    // Функции корзины
+    function addToCart(productId) {
+      const product = products.find(p => p.id === productId);
+      if (!product) return;
+
+      const existingItem = cart.find(item => item.id === productId);
+
+      if (existingItem) {
+        existingItem.quantity += 1;
+      } else {
+        cart.push({
+          ...product,
+          quantity: 1
+        });
+      }
+
+      updateCart();
+      showNotification(`Добавлено: ${product.name}`);
+    }
+
+    function removeFromCart(productId) {
+      cart = cart.filter(item => item.id !== productId);
+      updateCart();
+    }
+
+    function updateQuantity(productId, change) {
+      const item = cart.find(item => item.id === productId);
+      if (item) {
+        item.quantity += change;
+        if (item.quantity <= 0) {
+          removeFromCart(productId);
+        } else {
+          updateCart();
+        }
+      }
+    }
+
+    function updateCart() {
+      localStorage.setItem('mobile5g_cart', JSON.stringify(cart));
+      updateCartCount();
+      renderCart();
+      updateProfileStats();
+    }
+
+    function updateCartCount() {
+      const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+      document.getElementById('cartCount').textContent = count;
+      document.getElementById('detailCartCount').textContent = count;
+    }
+
+    function renderCart() {
+      const cartItems = document.getElementById('cartItems');
+      cartItems.innerHTML = '';
+
+      if (cart.length === 0) {
+        cartItems.innerHTML = `
+          <div style="text-align: center; padding: 40px 20px; color: var(--tg-theme-hint-color);">
+            <i class="fas fa-shopping-cart" style="font-size: 3rem; margin-bottom: 20px;"></i>
+            <p>Ваша корзина пуста</p>
+          </div>
+        `;
+
+        document.getElementById('subtotal').textContent = '0 ₽';
+        document.getElementById('total').textContent = '0 ₽';
+        return;
+      }
+
+      let subtotal = 0;
+
+      cart.forEach(item => {
+        const itemTotal = item.price * item.quantity;
+        subtotal += itemTotal;
+
+        const cartItem = document.createElement('div');
+        cartItem.className = 'cart-item';
+        cartItem.innerHTML = `
+          <div class="cart-item-image">
+            <img src="${item.image}" alt="${item.name}">
+          </div>
+          <div class="cart-item-content">
+            <h4 class="cart-item-title">${item.name}</h4>
+            <div class="cart-item-price">${item.price.toLocaleString()} ₽</div>
+            <div class="cart-item-actions">
+              <button class="quantity-btn" data-id="${item.id}" data-change="-1">-</button>
+              <span class="quantity">${item.quantity}</span>
+              <button class="quantity-btn" data-id="${item.id}" data-change="1">+</button>
+              <button style="margin-left: auto; background: none; border: none; color: var(--danger);"
+                      data-id="${item.id}" class="remove-btn">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        `;
+
+        cartItems.appendChild(cartItem);
+      });
+
+      document.getElementById('subtotal').textContent = `${subtotal.toLocaleString()} ₽`;
+      document.getElementById('total').textContent = `${subtotal.toLocaleString()} ₽`;
+
+      // Добавляем обработчики для кнопок в корзине
+      document.querySelectorAll('.quantity-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const productId = parseInt(btn.dataset.id);
+          const change = parseInt(btn.dataset.change);
+          updateQuantity(productId, change);
+        });
+      });
+
+      document.querySelectorAll('.remove-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const productId = parseInt(btn.dataset.id);
+          removeFromCart(productId);
+        });
+      });
+    }
+
+    function openCart() {
+      document.getElementById('cartPanel').classList.add('active');
+
+      if (tg) {
+        tg.BackButton.show();
+      }
+    }
+
+    function closeCart() {
+      document.getElementById('cartPanel').classList.remove('active');
+
+      if (tg) {
+        if (document.getElementById('homePage').classList.contains('active')) {
+          tg.BackButton.hide();
+        }
+      }
+    }
+
+    function showNotification(message) {
+      if (tg && tg.showPopup) {
+        tg.showPopup({
+          title: 'Уведомление',
+          message: message,
+          buttons: [{ type: 'ok' }]
+        });
+      } else {
+        // Fallback для браузера
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+          position: fixed;
+          top: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: var(--primary);
+          color: white;
+          padding: 12px 24px;
+          border-radius: 12px;
+          z-index: 9999;
+          animation: fadeIn 0.3s ease;
+          box-shadow: 0 4px 12px rgba(0,157,255,0.3);
+        `;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+          notification.style.opacity = '0';
+          notification.style.transform = 'translateX(-50%) translateY(-20px)';
+          setTimeout(() => notification.remove(), 300);
+        }, 2000);
+      }
+    }
+
+    // Функция авторизации
+    function login() {
+      isLoggedIn = true;
+      userBalance = 15840;
+      updateUserInfo();
+      showNotification('Вы успешно вошли в аккаунт');
+    }
+
+    function register() {
+      isLoggedIn = true;
+      userBalance = 5000; // Бонус за регистрацию
+      updateUserInfo();
+      showNotification('Регистрация прошла успешно! На ваш счет начислено 5000 ₽');
+    }
+
+    function logout() {
+      isLoggedIn = false;
+      userBalance = 0;
+      updateUserInfo();
+      showNotification('Вы вышли из аккаунта');
+    }
+
+    // Обработчики событий
+    document.addEventListener('DOMContentLoaded', () => {
+      // Инициализация
+      renderProducts();
+      renderCart();
+      updateProfileStats();
+      updateUserInfo();
+
+      // Логотип как кнопка домой
+      document.getElementById('homeButton').addEventListener('click', () => {
+        showPage('home');
+      });
+
+      // Категории
+      document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentCategory = btn.dataset.category;
+          renderProducts();
+        });
+      });
+
+      // Кнопки избранного и профиля в шапке
+      document.getElementById('favoritesButton').addEventListener('click', () => {
+        showPage('favorites');
+      });
+
+      document.getElementById('profileButton').addEventListener('click', () => {
+        showPage('profile');
+      });
+
+      // Корзина
+      document.getElementById('cartButton').addEventListener('click', openCart);
+      document.getElementById('detailCartButton').addEventListener('click', openCart);
+      document.getElementById('closeCartButton').addEventListener('click', closeCart);
+
+      // Назад из деталей товара
+      document.getElementById('backButton').addEventListener('click', closeProductDetail);
+
+      // Назад из разделов
+      document.getElementById('backFromOrders').addEventListener('click', () => showPage('profile'));
+      document.getElementById('backFromAddresses').addEventListener('click', () => showPage('profile'));
+      document.getElementById('backFromPayment').addEventListener('click', () => showPage('profile'));
+      document.getElementById('backFromSupport').addEventListener('click', () => showPage('profile'));
+
+      // Оформление заказа
+      document.getElementById('checkoutButton').addEventListener('click', () => {
+        if (cart.length === 0) {
+          showNotification('Добавьте товары в корзину');
+          return;
+        }
+
+        if (!isLoggedIn) {
+          showNotification('Для оформления заказа необходимо войти в аккаунт');
+          return;
+        }
+
+        const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+        if (userBalance >= total) {
+          userBalance -= total;
+          updateUserInfo();
+          showNotification(`Заказ оформлен! С вашего счета списано ${total.toLocaleString()} ₽`);
+          cart = [];
+          updateCart();
+          closeCart();
+        } else {
+          showNotification('Недостаточно средств на балансе');
+        }
+      });
+
+      // Нижнее меню
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.preventDefault();
+          const page = item.dataset.page;
+          showPage(page);
+        });
+      });
+
+      // Кнопка "Перейти в магазин" в пустом избранном
+      document.getElementById('goToHomeFromFav').addEventListener('click', () => {
+        showPage('home');
+      });
+
+      // Меню профиля
+      document.getElementById('ordersMenuItem').addEventListener('click', () => {
+        showPage('orders');
+      });
+
+      document.getElementById('addressesMenuItem').addEventListener('click', () => {
+        showPage('addresses');
+      });
+
+      document.getElementById('paymentMenuItem').addEventListener('click', () => {
+        showPage('payment');
+      });
+
+      document.getElementById('supportMenuItem').addEventListener('click', () => {
+        showPage('support');
+      });
+
+      // Авторизация
+      document.addEventListener('click', (e) => {
+        if (e.target.closest('#loginButton')) {
+          login();
+        } else if (e.target.closest('#registerButton')) {
+          register();
+        } else if (e.target.closest('#logoutButton')) {
+          logout();
+        }
+      });
+
+      // Кнопки в разделах
+      document.getElementById('addAddressBtn').addEventListener('click', () => {
+        showNotification('Функция добавления адреса в разработке');
+      });
+
+      document.getElementById('addPaymentBtn').addEventListener('click', () => {
+        showNotification('Функция добавления способа оплаты в разработке');
+      });
+
+      document.getElementById('contactAdminBtn').addEventListener('click', () => {
+        showNotification('Связь с администратором: @mobile5g_admin');
+      });
+
+      // Активация адресов и способов оплаты
+      document.addEventListener('click', (e) => {
+        if (e.target.closest('.address-card')) {
+          document.querySelectorAll('.address-card').forEach(card => {
+            card.classList.remove('active');
+          });
+          e.target.closest('.address-card').classList.add('active');
+        }
+
+        if (e.target.closest('.payment-method')) {
+          document.querySelectorAll('.payment-method').forEach(method => {
+            method.classList.remove('active');
+          });
+          e.target.closest('.payment-method').classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
